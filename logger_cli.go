@@ -1,55 +1,54 @@
 package typewriter
 
 import (
+	"fmt"
+
 	"github.com/fatih/color"
 )
 
-type cliLogger struct {
+// CLILogger provides a logger that prints colored logs for CLI tools to enable users to capture
+// relevant logs quickly. As opposed to other loggers, this logger does neither carry a name, nor
+// provides any context. Note that this logger is generally slower than other loggers.
+type CLILogger struct {
 }
 
-// NewCLILogger returns a newly configured logger that prints colored logs for CLI tools to enable
-// capturing relevant logs quickly. The CLI logger does not provide any context.
+// NewCLILogger returns a newly configured CLILogger.
 func NewCLILogger() Logger {
-	return cliLogger{}
+	return CLILogger{}
 }
 
-func (log cliLogger) With(name string) Logger {
+// With is a no-op which returns the CLI logger that the method is called on.
+func (log CLILogger) With(name string) Logger {
 	return log
 }
 
-func (log cliLogger) WithV(values ...Value) Logger {
+// WithV is a no-op which returns the CLI logger that the method is called on.
+func (log CLILogger) WithV(value fmt.Stringer, others ...fmt.Stringer) Logger {
 	return log
 }
 
-func (log cliLogger) Info(message string, values ...Value) {
+// Info logs the specified message along with a set of values. Logging color will be blue. A newline
+// will be added automatically.
+func (log CLILogger) Info(message string, values ...fmt.Stringer) {
 	col := color.New(color.FgBlue).Add(color.Bold)
-
-	valStr := log.valueString(values)
-	if valStr != "" {
-		valStr = " [" + valStr + "]"
-	}
-
-	col.Printf("%s%s\n", message, valStr)
+	col.Printf("%s%s\n", message, concatenate(values, ", ", " [", "]"))
 }
 
-func (log cliLogger) Error(err error, message string) {
+// Infof logs a format string. Logging color will be blue. A newline will be added automatically.
+func (log CLILogger) Infof(format string, values ...interface{}) {
+	col := color.New(color.FgBlue).Add(color.Bold)
+	col.Printf(format+"\n", values)
+}
+
+// Error logs the specified error and message along with the given values. Logging color will be
+// red. A newline will be added automatically.
+func (log CLILogger) Error(message string, err error, values ...fmt.Stringer) {
 	col := color.New(color.FgRed).Add(color.Bold)
-	col.Printf("%s: %s\n", message, err)
+	col.Printf("%s: %s%s\n", message, err, concatenate(values, ", ", " [", "]"))
 }
 
-func (cliLogger) valueString(values []Value) string {
-	if len(values) == 0 {
-		return ""
-	}
-
-	res := ""
-	for i, v := range values {
-		if i == 0 {
-			res += v.String()
-		} else {
-			res += ", " + v.String()
-		}
-	}
-
-	return res
+// Success logs a success message. Logging color will be green, a newline is added automatically.
+func (log CLILogger) Success(message string) {
+	col := color.New(color.FgGreen).Add(color.Bold)
+	col.Printf("%s\n", message)
 }

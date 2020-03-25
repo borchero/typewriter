@@ -2,74 +2,57 @@ package typewriter
 
 import "fmt"
 
-type userLogger struct {
+// UserLogger provides a logger that prints logs for long-running processes (e.g. servers) in a
+// human-readable format. This format is not necessarily suitable for tools analyzing logs.
+type UserLogger struct {
 	name   string
-	values []Value
+	values []fmt.Stringer
 }
 
-// NewUserLogger returns a newly configured logger that prints logs for long-running processes
-// (e.g. servers) in a human-readable format.
+// NewUserLogger returns a newly configured UserLogger with the specified name.
 func NewUserLogger(name string) Logger {
-	return userLogger{name, make([]Value, 0)}
+	return UserLogger{name, make([]fmt.Stringer, 0)}
 }
 
-func (log userLogger) With(name string) Logger {
-	return userLogger{
+// With appends the specified name to the logger's name, seperated by a period character.
+func (log UserLogger) With(name string) Logger {
+	return UserLogger{
 		name:   fmt.Sprintf("%s.%s", log.name, name),
 		values: log.values,
 	}
 }
 
-func (log userLogger) WithV(values ...Value) Logger {
-	v := copyValueSlice(log.values)
+// WithV specifies additional values to be logged whenever the logger is logging.
+func (log UserLogger) WithV(value fmt.Stringer, values ...fmt.Stringer) Logger {
+	v := copySlice(log.values)
 	for _, value := range values {
 		v = append(v, value)
 	}
-	return userLogger{
+	return UserLogger{
 		name:   log.name,
 		values: v,
 	}
 }
 
-func (log userLogger) Info(message string, values ...Value) {
+// Info logs the specified message along with the given values. It also adds the logging level and
+// a timestamp.
+func (log UserLogger) Info(message string, values ...fmt.Stringer) {
 	str := fmt.Sprintf("[INFO] %s (%s)", log.name, timeNow())
-	if kv := log.valueString(log.values); kv != "" {
-		str += " " + kv
-	}
+	str += concatenate(log.values, " | ", " [", "]")
 
 	if len(values) == 0 {
 		fmt.Printf("%s => %s\n", str, message)
 		return
 	}
 
-	valStr := log.valueString(values)
-	if valStr != "" {
-		valStr = " [" + valStr + "]"
-	}
-
-	fmt.Printf("%s => %s%s\n", str, message, valStr)
+	message += concatenate(values, " | ", " [", "]")
+	fmt.Printf("%s => %s\n", str, message)
 }
 
-func (log userLogger) Error(err error, message string) {
+func (log UserLogger) Error(message string, err error, values ...fmt.Stringer) {
 	str := fmt.Sprintf("[ERROR] %s (%s)", log.name, timeNow())
-	if kv := log.valueString(log.values); kv != "" {
-		str += " " + kv
-	}
-	fmt.Printf("%s => %s [%s]\n", str, message, err)
-}
+	str += concatenate(log.values, " | ", " [", "]")
 
-func (log userLogger) valueString(values []Value) string {
-	if len(values) == 0 {
-		return ""
-	}
-
-	res := ""
-	for i, v := range values {
-		if i == 0 {
-			res += v.String()
-		} else {
-			res += " | " + v.String()
-		}
-	}
-	return res
+	suffix := concatenate(log.values, " | ", " [", "]")
+	fmt.Printf("%s => %s: %s%s\n", str, message, err, suffix)
 }

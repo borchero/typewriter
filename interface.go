@@ -1,24 +1,27 @@
 package typewriter
 
-// Logger represents an interface that can be adapted by all loggers.
+import "fmt"
+
+// Logger represents an interface that can be adapted by all loggers. Specific loggers may expose
+// more functionality.
 type Logger interface {
+
 	// With appends the specified name to the name identifying the logger.
 	With(name string) Logger
 
 	// WithV specifies additional values to be logged in order to provide more context.
-	WithV(values ...Value) Logger
+	WithV(value fmt.Stringer, others ...fmt.Stringer) Logger
 
 	// Info logs the specified message and optionally a set of values.
-	Info(message string, values ...Value)
+	Info(message string, values ...fmt.Stringer)
 
 	// Error logs the specified error together with a custom message and the logger's name and
-	// context values.
-	Error(err error, message string)
+	// context values. Optionally, a set of values is logged as well. The error may be nil.
+	Error(message string, err error, values ...fmt.Stringer)
 }
 
-// Value represents an interface that converts an element to a string.
-type Value interface {
-
-	// String returns a string representation of the value to be printed.
-	String() string
+// Fail calls the Error method of the given logger and subsequently panics, i.e. kills the program.
+func Fail(logger Logger, message string, err error) {
+	logger.Error(message, err)
+	panic(err)
 }
