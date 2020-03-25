@@ -2,14 +2,13 @@ package typewriter
 
 import "fmt"
 
-// UserLogger logs with a human-readable format for applications where logs are only informational
-// and do not need to be imported into other programs.
 type userLogger struct {
 	name   string
 	values []Value
 }
 
-// NewUserLogger returns a newly configured user logger with the given name.
+// NewUserLogger returns a newly configured logger that prints logs for long-running processes
+// (e.g. servers) in a human-readable format.
 func NewUserLogger(name string) Logger {
 	return userLogger{name, make([]Value, 0)}
 }
