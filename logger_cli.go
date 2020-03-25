@@ -13,7 +13,7 @@ type CLILogger struct {
 }
 
 // NewCLILogger returns a newly configured CLILogger.
-func NewCLILogger() Logger {
+func NewCLILogger() CLILogger {
 	return CLILogger{}
 }
 
@@ -45,6 +45,12 @@ func (log CLILogger) Infof(format string, values ...interface{}) {
 func (log CLILogger) Error(message string, err error, values ...fmt.Stringer) {
 	col := color.New(color.FgRed).Add(color.Bold)
 	col.Printf("%s: %s%s\n", message, err, concatenate(values, ", ", " [", "]"))
+}
+
+// Errorf logs a format string. Logging color will be red. A newline will be added automatically.
+func (log CLILogger) Errorf(format string, values ...interface{}) {
+	col := color.New(color.FgRed).Add(color.Bold)
+	col.Printf(format+"\n", values)
 }
 
 // Success logs a success message. Logging color will be green, a newline is added automatically.
