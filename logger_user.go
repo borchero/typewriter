@@ -54,5 +54,9 @@ func (log UserLogger) Error(message string, err error, values ...fmt.Stringer) {
 	str += concatenate(log.values, " | ", " [", "]")
 
 	suffix := concatenate(log.values, " | ", " [", "]")
-	fmt.Printf("%s => %s: %s%s\n", str, message, err, suffix)
+	if err != nil {
+		suffix = ": " + fmt.Sprint(err) + suffix
+	}
+
+	fmt.Printf("%s => %s%s\n", str, message, suffix)
 }

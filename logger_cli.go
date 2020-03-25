@@ -44,7 +44,11 @@ func (log CLILogger) Infof(format string, values ...interface{}) {
 // red. A newline will be added automatically.
 func (log CLILogger) Error(message string, err error, values ...fmt.Stringer) {
 	col := color.New(color.FgRed).Add(color.Bold)
-	col.Printf("%s: %s%s\n", message, err, concatenate(values, ", ", " [", "]"))
+	suffix := concatenate(values, ", ", " [", "]")
+	if err != nil {
+		suffix = ": " + fmt.Sprint(err) + suffix
+	}
+	col.Printf("%s%s\n", message, suffix)
 }
 
 // Errorf logs a format string. Logging color will be red. A newline will be added automatically.
