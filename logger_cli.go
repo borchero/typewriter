@@ -5,14 +5,12 @@ import (
 )
 
 type cliLogger struct {
-	name   string
-	values []Value
 }
 
 // NewCLILogger returns a newly configured logger that prints colored logs for CLI tools to enable
 // capturing relevant logs quickly. The CLI logger does not provide any context.
 func NewCLILogger() Logger {
-	return userLogger{"", []Value{}}
+	return cliLogger{}
 }
 
 func (log cliLogger) With(name string) Logger {
@@ -36,7 +34,7 @@ func (log cliLogger) Info(message string, values ...Value) {
 
 func (log cliLogger) Error(err error, message string) {
 	col := color.New(color.FgRed).Add(color.Bold)
-	col.Printf("%s: %s", message, err)
+	col.Printf("%s: %s\n", message, err)
 }
 
 func (cliLogger) valueString(values []Value) string {
