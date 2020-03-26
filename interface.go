@@ -1,6 +1,9 @@
 package typewriter
 
-import "fmt"
+import (
+	"fmt"
+	"os"
+)
 
 // Logger represents an interface that can be adapted by all loggers. Specific loggers may expose
 // more functionality.
@@ -20,8 +23,9 @@ type Logger interface {
 	Error(message string, err error, values ...fmt.Stringer)
 }
 
-// Fail calls the Error method of the given logger and subsequently panics, i.e. kills the program.
+// Fail calls the Error method of the given logger and subsequently exits the program with error
+// code 1.
 func Fail(logger Logger, message string, err error) {
 	logger.Error(message, err)
-	panic(err)
+	os.Exit(1)
 }
