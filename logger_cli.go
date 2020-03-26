@@ -37,7 +37,7 @@ func (log CLILogger) Info(message string, values ...fmt.Stringer) {
 // Infof logs a format string. Logging color will be blue. A newline will be added automatically.
 func (log CLILogger) Infof(format string, values ...interface{}) {
 	col := color.New(color.FgBlue).Add(color.Bold)
-	col.Printf(format+"\n", values)
+	col.Printf(format+"\n", values...)
 }
 
 // Error logs the specified error and message along with the given values. Logging color will be
@@ -54,7 +54,7 @@ func (log CLILogger) Error(message string, err error, values ...fmt.Stringer) {
 // Errorf logs a format string. Logging color will be red. A newline will be added automatically.
 func (log CLILogger) Errorf(format string, values ...interface{}) {
 	col := color.New(color.FgRed).Add(color.Bold)
-	col.Printf(format+"\n", values)
+	col.Printf(format+"\n", values...)
 }
 
 // Success logs a success message. Logging color will be green, a newline is added automatically.
